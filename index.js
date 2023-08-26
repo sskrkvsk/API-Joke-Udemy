@@ -1,21 +1,59 @@
 import express from "express";
+import axios from "axios";
 import bodyParser from "body-parser";
 
 const app = express();
 const port = 3000;
 const masterKey = "4VGP2DN-6EWM4SJ-N6FGRHV-Z3PR3TT";
+const config = {
+  headers: { Authorization: `Bearer ${masterKey}` },
+};
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //1. GET a random joke
+app.get('/random', (req, res) => {
+  const randomjoke = Math.floor(Math.random() * jokes.length);
+  res.json(jokes[randomjoke]);
+});
+
 
 //2. GET a specific joke
+app.get("/jokes/:id", (req, res) => {
+  const jokeId = req.params.id; // returns number as a string
+  res.json(jokes[jokeId-1]); // counts it anyway
+// my code above 
+
+// const id = parseInt(req.params.id);
+// const foundJoke = jokes.find((joke) => joke.id === id);
+// res.json(foundJoke);
+});
+
 
 //3. GET a jokes by filtering on the joke type
+app.get("/filter", (req, res) => {
+  const query = req.query.type;
+  const ofType = jokes.filter((joke) => joke.jokeType === query);
+  res.json(ofType);
+});
+
 
 //4. POST a new joke
+app.post("/jokes/", (req, res) => {
+
+const newJoke = {
+  id: jokes.length+1,
+  jokeText: req.body.text,
+  jokeType: req.body.type,
+};
+
+jokes.push(newJoke);
+res.json(newJoke);
+});
 
 //5. PUT a joke
+
+
 
 //6. PATCH a joke
 
