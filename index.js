@@ -1,13 +1,10 @@
 import express from "express";
-import axios from "axios";
 import bodyParser from "body-parser";
 
 const app = express();
 const port = 3000;
 const masterKey = "4VGP2DN-6EWM4SJ-N6FGRHV-Z3PR3TT";
-const config = {
-  headers: { Authorization: `Bearer ${masterKey}` },
-};
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -69,9 +66,9 @@ jokes[rewrotedJoke.id - 1] = rewrotedJoke;  // reasign it
 //6. PATCH a joke
 app.patch("/jokes/:id", (req, res) => {
   const jokeId = req.params.id;
-  jokes[jokeId-1].jokeText = req.body.text;
-  jokes[jokeId-1].jokeType = req.body.type;
-
+  jokes[jokeId-1].jokeText = req.body.text || jokes[jokeId-1].jokeText;
+  jokes[jokeId-1].jokeType = req.body.type || jokes[jokeId-1].jokeType;
+  // if nothing were typed in leave what it was before
   res.json(jokes[jokeId-1]);
 });
 
@@ -81,24 +78,30 @@ app.delete("/jokes/:id", (req, res) => {
 
   if (jokes[jokeId-1]) {
     jokes.splice(jokeId-1, 1);
-    res.status(200).json( 'OK' );
+    res.sendStatus(200);
   } else {
-    res.status(400).json({ error:`Joke with id: ${jokeId} not found. No jokes were deleted.`});
+    res.status(404).json({ error:`Joke with id: ${jokeId} not found. No jokes were deleted.`});
   }
 
 });
 
 //8. DELETE All jokes
 app.delete("/all", (req, res) => {
+const key = req.query.key;
 
-jokes.splice(0, jokes.length);
-res.status(200).json( 'OK' );
+if (key === masterKey) {
+  jokes.splice(0, jokes.length); // or jokes = [];
+  res.sendStatus(200);
+} else {
+  res.status(404).json({ error:`Your key is wrong`});
+}
 });
 
 app.listen(port, () => {
   console.log(`Successfully started server on port ${port}.`);
 });
 
+// jokes array
 var jokes = [
   {
     id: 1,
